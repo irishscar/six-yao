@@ -1,0 +1,12 @@
+# application.fam —— Flipper Zero 工程描述文件（Python 语法，由 fbt 解析）
+# 本文件声明应用 ID、名称、类型、C 入口函数、编译依赖与栈大小。
+
+App(
+    appid="liuyao_zhanbu",          # 应用唯一 ID，fbt 编译目标名 fap_liuyao_zhanbu
+    name="LiuYao",                  # 在菜单中显示的名称
+    apptype=FlipperAppType.EXTERNAL,# 外部应用（放置于 applications_user/，随固件打包/从 SD 加载）
+    entry_point="liuyao_app",       # 对应 liuyao.c 中的 int32_t liuyao_app(void* p)
+    cdefines=["APP_LIUYAO"],        # 传入编译宏（可选）
+    requires=["gui"],               # 依赖的固件模块
+    stack_size=2048,                # 任务栈大小（本应用足够且保守）
+)
