@@ -1,0 +1,125 @@
+六爻占卜 APP —— 给你的“电脑小白”操作指南
+============================================
+
+【先说最重要的：这些文件在你自己电脑上】
+它们放在这里：
+C:\Users\Lenovo\WorkBuddy\2026-10-05-14-17-02\liuyao\
+打开“此电脑”，把上面这行地址复制到窗口最上方的地址栏，按回车，就能看到这个文件夹。
+里面有：application.fam、liuyao.c、liuyao.h、cn_font.c、cn_font.h、一个叫 .github 的文件夹，以及本说明。
+
+【为什么我没有直接给你“装好就能用”的文件？】
+这个 APP 必须先变成 Flipper 能识别的格式（这种格式叫 .fap 文件，相当于手机上的安装包）。
+要生成 .fap，需要从一个国外网站下载一个几百 MB 的开发工具包。
+你这台电脑的网络在下载大文件时会卡住，所以我没法在这里帮您直接编出来。
+下面的办法是：借“别人的电脑”（免费、不用你装软件）帮你编好，你只需要在网页上点几下。
+
+================================================================
+方法一：用 GitHub 免费网站编译（推荐，全程网页点选）
+================================================================
+
+第 1 步：注册账号
+  打开网址 https://github.com
+  点右上角 “Sign up” 注册一个免费账号（按提示填邮箱、密码即可）。
+
+第 2 步：新建一个仓库（仓库 = 一个用来放代码的地方）
+  登录后，点页面右上角的 “+” 号 → 选 “New repository”
+  - Repository name（仓库名）：随便填英文，比如 liuyao
+  - 下面选 “Public”（公开）
+  - 勾选 “Add a README file”
+  - 拉到最下面点 “Create repository”
+
+第 3 步：把 5 个代码文件传上去
+  进入仓库后，点绿色的 “Add file” 按钮 → 选 “Upload files”
+  - 把你电脑里 liuyao 文件夹下的这 5 个文件，一起拖进网页上传区：
+      application.fam
+      liuyao.c
+      liuyao.h
+      cn_font.c
+      cn_font.h
+  - 拖进去后，拉到页面最下面，点 “Commit changes” 按钮。
+
+第 4 步：上传那个“自动编译脚本”
+  回到仓库页面，再点 “Add file” → 这次选 “Create new file”
+  - 在文件名那个框里，一字不差地输入（含点和斜杠）：
+      .github/workflows/build.yml
+    （输入这个长名字后，网页会自动帮你建好嵌套文件夹，不用担心）
+  - 在下面的空白文本框里，粘贴下面【编译脚本全文】那一段内容。
+  - 拉到底点 “Commit changes”。
+
+第 5 步：点一下，让它开始编译
+  点仓库顶部的 “Actions” 标签
+  - 左边能看到 “Build FAP”，点它
+  - 右边点 “Run workflow” 按钮，再点一次 “Run workflow”
+  - 之后会出现一个黄色小圆圈，表示正在编译（相当于在云端帮你干活）
+
+第 6 步：等几分钟，下载成品
+  3~5 分钟后，圆圈变绿色对勾 = 成功。
+  点进去看，页面下方 “Artifacts” 那里有个 liuyao_zhanbu（是个压缩包），
+  点它下载到电脑。下载后解压，里面就是 liuyao_zhanbu.fap。
+
+第 7 步：把 .fap 装进 Flipper（见下方“安装”部分）
+
+================================================================
+【编译脚本全文】—— 第 4 步粘贴到这里
+================================================================
+name: Build FAP
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout app source
+        uses: actions/checkout@v4
+
+      - name: Clone Flipper Zero firmware
+        run: |
+          git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git
+
+      - name: Copy app into firmware tree
+        run: |
+          mkdir -p flipperzero-firmware/applications_user/liuyao
+          cp application.fam liuyao.c liuyao.h cn_font.c cn_font.h \
+             flipperzero-firmware/applications_user/liuyao/
+          cd flipperzero-firmware
+          ./fbt fap_liuyao_zhanbu
+
+      - name: Upload FAP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: liuyao_zhanbu
+          path: flipperzero-firmware/build/**/*.fap
+
+================================================================
+拿到 liuyao_zhanbu.fap 后，怎么装进 Flipper
+================================================================
+
+方法 A（如果你电脑装了 qFlipper 软件）：
+  用数据线把 Flipper 连上电脑，打开 qFlipper。
+  软件里有个“文件管理器”，把 liuyao_zhanbu.fap 拖到 SD 卡的 /ext/apps/ 下面任意位置。
+  然后在 Flipper 上打开 “Apps” 菜单，就能看到「六爻占卜」了。
+
+方法 B（用 SD 卡）：
+  把 Flipper 的 SD 卡拔出来，插进电脑读卡器，
+  把 liuyao_zhanbu.fap 复制到卡的 apps 文件夹里，再插回 Flipper。
+  在 Flipper 的 Apps 菜单里就能打开。
+
+================================================================
+方法二：找人代编（最省事，如果你有懂电脑的朋友）
+================================================================
+直接把这个 liuyao 文件夹整个发给会编程的朋友或群里，
+让他按文件里写的命令（./fbt fap_liuyao_zhanbu 或 ufbt）编译，
+把生成的 .fap 文件还给你，你再用上面的“安装”步骤装进 Flipper 就行。
+
+================================================================
+APP 怎么用（装好后）
+================================================================
+- 打开「六爻占卜」，看到“六爻起卦”欢迎页。
+- 想一爻一爻摇：每按一次 OK 键生成一爻，共六次，自动排出完整卦象。
+- 想一次摇完：在欢迎页【长按】OK 键不放，约 1 秒后自动摇出六爻。
+- 上/下键移动光标查看每一爻是少阳/少阴/老阳/老阴；有变爻时会同时显示本卦和变卦。
+- 返回键退出。
